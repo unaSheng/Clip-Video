@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="13122.16" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="21225" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+    <device id="retina6_0" orientation="portrait" appearance="dark"/>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13104.12"/>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21207"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -9,16 +11,73 @@
         <!--View Controller-->
         <scene sceneID="tne-QT-ifu">
             <objects>
-                <viewController id="BYZ-38-t0r" customClass="ViewController" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="BYZ-38-t0r" customClass="ViewController" customModule="ClipVideo" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <rect key="frame" x="0.0" y="0.0" width="390" height="844"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" xcode11CocoaTouchSystemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                        <subviews>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Idd-ph-ErR">
+                                <rect key="frame" x="276" y="67" width="94" height="35"/>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="plain" title="选取视频">
+                                    <color key="baseForegroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                </buttonConfiguration>
+                                <connections>
+                                    <action selector="selectVideoButtonTapped:" destination="BYZ-38-t0r" eventType="touchUpInside" id="NjG-oI-fLt"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="3XO-im-alA">
+                                <rect key="frame" x="20" y="67" width="29.666666666666671" height="22.666666666666671"/>
+                                <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                <state key="normal" image="speaker.wave.2.fill" catalog="system"/>
+                                <state key="selected" image="speaker.slash.fill" catalog="system"/>
+                                <connections>
+                                    <action selector="muteButtonTapped:" destination="BYZ-38-t0r" eventType="touchUpInside" id="M6u-bf-hCa"/>
+                                </connections>
+                            </button>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="BIt-Mq-EXR" customClass="VideoPlayerView" customModule="ClipVideo" customModuleProvider="target">
+                                <rect key="frame" x="0.0" y="122" width="390" height="568"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            </view>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Pj6-0Y-reb" customClass="ClipControlView" customModule="ClipVideo" customModuleProvider="target">
+                                <rect key="frame" x="10" y="710" width="370" height="50"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="50" id="LrX-9j-Nyk"/>
+                                </constraints>
+                            </view>
+                        </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
+                        <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <constraints>
+                            <constraint firstItem="3XO-im-alA" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="20" id="3zy-Cc-ehk"/>
+                            <constraint firstItem="3XO-im-alA" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="20" id="60P-1F-VEo"/>
+                            <constraint firstItem="Pj6-0Y-reb" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="10" id="BMt-Qi-7iw"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="Pj6-0Y-reb" secondAttribute="bottom" constant="50" id="HrC-Q1-b7G"/>
+                            <constraint firstItem="Idd-ph-ErR" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="20" id="IfW-Ra-EWK"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="BIt-Mq-EXR" secondAttribute="trailing" id="NRU-p7-SEs"/>
+                            <constraint firstItem="Pj6-0Y-reb" firstAttribute="top" secondItem="BIt-Mq-EXR" secondAttribute="bottom" constant="20" id="NcQ-56-zIv"/>
+                            <constraint firstItem="BIt-Mq-EXR" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="OhZ-2b-Xfn"/>
+                            <constraint firstItem="Pj6-0Y-reb" firstAttribute="trailing" secondItem="6Tk-OE-BBY" secondAttribute="trailing" constant="-10" id="PyQ-FO-frK"/>
+                            <constraint firstItem="Idd-ph-ErR" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="3XO-im-alA" secondAttribute="trailing" constant="8" symbolic="YES" id="WX0-hO-viS"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="Idd-ph-ErR" secondAttribute="trailing" constant="20" id="WZ4-sR-HlH"/>
+                            <constraint firstItem="BIt-Mq-EXR" firstAttribute="top" secondItem="Idd-ph-ErR" secondAttribute="bottom" constant="20" id="s7Y-fg-piW"/>
+                        </constraints>
                     </view>
+                    <connections>
+                        <outlet property="clipControlView" destination="Pj6-0Y-reb" id="99Q-pa-BvU"/>
+                        <outlet property="muteButton" destination="3XO-im-alA" id="NTd-ls-MuU"/>
+                        <outlet property="videoPlayerView" destination="BIt-Mq-EXR" id="cbY-eV-c5Q"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
+            <point key="canvasLocation" x="130.76923076923077" y="-34.123222748815166"/>
         </scene>
     </scenes>
+    <resources>
+        <image name="speaker.slash.fill" catalog="system" width="118" height="128"/>
+        <image name="speaker.wave.2.fill" catalog="system" width="128" height="88"/>
+    </resources>
 </document>
