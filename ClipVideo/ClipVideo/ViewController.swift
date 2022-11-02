@@ -14,11 +14,14 @@ class ViewController: UIViewController {
     @IBOutlet private weak var videoPlayerView: VideoPlayerView!
     @IBOutlet private weak var clipControlView: ClipControlView!
     @IBOutlet private weak var muteButton: UIButton!
+    @IBOutlet private weak var cancelButton: UIButton!
+    @IBOutlet private weak var finishButton: UIButton!
     
     private var isMuted = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        showClipSubviewsIfNeeded(false)
     }
     
     @IBAction private func muteButtonTapped(_ sender: Any) {
@@ -36,13 +39,44 @@ class ViewController: UIViewController {
         self.present(pickerVC, animated: true)
     }
     
+    
+    @IBAction private func cancelButtonTapped(_ sender: Any) {
+        clipControlView.reset()
+    }
+    
+    @IBAction private func finishButtonTapped(_ sender: Any) {
+        Task {
+            do {
+                let url = try await clipControlView.exportVideo()
+                UISaveVideoAtPathToSavedPhotosAlbum(url.path, self, #selector(saveVideoToAlbum), nil)
+            } catch {
+                print(error.localizedDescription)
+            }
+        }
+    }
+    
+    @objc private func saveVideoToAlbum(_ videoPath: String?, didFinishSavingWithError error: Error?, contextInfo: UnsafeMutableRawPointer?) {
+        if error == nil {
+            print("保存成功")
+        }
+    }
+    
     private func updateVideo(_ url: URL) {
         let item = AVPlayerItem(url: url)
         let player = AVPlayer(playerItem: item)
         player.volume = 1
         videoPlayerView.playerLayer.player = player
         videoPlayerView.playerLayer.videoGravity = .resizeAspect
+        clipControlView.loadAssetCompletion = { [weak self] in
+            self?.showClipSubviewsIfNeeded(true)
+        }
         clipControlView.updateUI(player: player)
+    }
+    
+    private func showClipSubviewsIfNeeded(_ show: Bool) {
+        clipControlView.isHidden = !show
+        cancelButton.isHidden = !show
+        finishButton.isHidden = !show
     }
 }
 
