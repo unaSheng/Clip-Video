@@ -16,7 +16,7 @@ struct InstructionError: LocalizedError {
 
 class ClipControlView: UIView {
     
-    static let timescale: Int32 = 48_000
+    static let timescale: Int32 = 600
     
     enum ClipPosition {
         case head
@@ -189,14 +189,13 @@ class ClipControlView: UIView {
     }
     
     private func observerPlayerPeriodicTime() {
-        timeObserver = avPlayer?.addPeriodicTimeObserver(forInterval: CMTime(value: 960, timescale: Self.timescale), queue: .main) { [weak self] time in
+        timeObserver = avPlayer?.addPeriodicTimeObserver(forInterval: CMTime(value: 12, timescale: Self.timescale), queue: .main) { [weak self] time in
             guard let strongSelf = self, let currentItem = strongSelf.avPlayer?.currentItem else { return }
             let totalSeconds = currentItem.duration.seconds
             let currentSeconds = currentItem.currentTime().seconds
 
             if totalSeconds - currentSeconds <= strongSelf.tailClipedDuration.seconds {
-                strongSelf.avPlayer?.pause()
-                strongSelf.isPlaying = false
+                strongSelf.pauseVideo()
             }
             var progress = min(max(strongSelf.headClipedDuration.seconds, currentSeconds), totalSeconds - strongSelf.tailClipedDuration.seconds) / totalSeconds
             progress = min(1, max(0, progress))
@@ -216,7 +215,7 @@ class ClipControlView: UIView {
         if isPlaying {
             player.pause()
         } else {
-            if abs(playingIndicatorView.frame.maxX - (lightPreviewView.frame.maxX - clipPositionWidth)) < 0.01 {
+            if abs(playingIndicatorView.frame.maxX - (lightPreviewView.frame.maxX - clipPositionWidth)) < 0.1 {
                 item.seek(to: headClipedDuration, toleranceBefore: .zero, toleranceAfter: .zero, completionHandler: { _ in
                     player.play()
                 })
@@ -344,7 +343,7 @@ class ClipControlView: UIView {
     }
     
     private func setupSubviews() {
-        self.layer.cornerRadius = 10
+        self.layer.cornerRadius = 5
         self.clipsToBounds = true
         // 播放按钮
         playButton.tintColor = UIColor.white
@@ -403,7 +402,7 @@ class ClipControlView: UIView {
         
         // 中间预览区域
         lightPreviewView.backgroundColor = UIColor.systemYellow
-        lightPreviewView.layer.cornerRadius = 10
+        lightPreviewView.layer.cornerRadius = 5
         lightPreviewView.clipsToBounds = true
         lightPreviewView.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(panOnLightPreviewView(_:))))
         lightPreviewMaskLayer.backgroundColor = UIColor.clear.cgColor
