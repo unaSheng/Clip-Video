@@ -161,6 +161,7 @@ class ClipControlView: UIView {
                 guard let strongSelf = self else { return }
                 if item.duration != .invalid {
                     strongSelf.loadAssetCompletion?()
+                    strongSelf.minPreviewWidth = strongSelf.validMaxDurationWidth * (strongSelf.minTargetDuration.seconds / item.duration.seconds)
                     let imageGenerator = AVAssetImageGenerator(asset: item.asset)
                     imageGenerator.appliesPreferredTrackTransform = true
                     let frameSecond = item.duration.seconds / Double(strongSelf.previewFrames.count)
@@ -229,7 +230,7 @@ class ClipControlView: UIView {
     @objc private func panOnHeadClipPositionView(_ pan: UIPanGestureRecognizer) {
         pauseVideo()
         let location = pan.location(in: backgroundView)
-        headOffset = min(max(0, location.x), validMaxDurationWidth - tailOffset)
+        headOffset = min(max(0, location.x), validMaxDurationWidth - tailOffset - minPreviewWidth)
         updateSubviewsPosition()
         let alpha: CGFloat
         switch pan.state {
@@ -247,7 +248,7 @@ class ClipControlView: UIView {
         pauseVideo()
         let backgroundViewWidth = backgroundView.bounds.width
         let location = pan.location(in: backgroundView)
-        tailOffset = min(max(0, backgroundViewWidth - location.x), validMaxDurationWidth - headOffset)
+        tailOffset = min(max(0, backgroundViewWidth - location.x), validMaxDurationWidth - headOffset - minPreviewWidth)
         updateSubviewsPosition()
         let alpha: CGFloat
         switch pan.state {
