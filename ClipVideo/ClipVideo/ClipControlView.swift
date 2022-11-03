@@ -36,9 +36,9 @@ class ClipControlView: UIView {
     // 尾部被裁剪区域
     private let tailMaskView = UIView()
     // 中间预览区域
-    private let lightPreviewView = UIView()
+    private let targetPreviewView = UIView()
     // 中间预览区域的Mask
-    private let lightPreviewMaskLayer = CAShapeLayer()
+    private let targetPreviewMaskLayer = CAShapeLayer()
     // 头部裁剪位置
     private let headClipPositionView = PositionView()
     // 尾部裁剪位置
@@ -56,22 +56,22 @@ class ClipControlView: UIView {
     
     private var headOffset: CGFloat = 0
     private var tailOffset: CGFloat = 0
-    private(set) var headClipedDuration: CMTime = .zero
-    private(set) var tailClipedDuration: CMTime = .zero
+    private var headClipedDuration: CMTime = .zero
+    private var tailClipedDuration: CMTime = .zero
     
-    private var minPreviewWidth: CGFloat = 0
+    private var minTargetPreviewWidth: CGFloat = 0
     private var minTargetDuration: CMTime = CMTime(seconds: 1, preferredTimescale: ClipControlView.timescale)
-    
-    private let clipPositionWidth: CGFloat = 20
-    private let previewVerticalMargin: CGFloat = 5
-    private let playingIndicatorViewWidth: CGFloat = 3
-    private var validMaxDurationWidth: CGFloat {
-        return backgroundView.bounds.width - clipPositionWidth * 2 - playingIndicatorViewWidth
+    private var maxTargetPreviewWidth: CGFloat {
+        return backgroundView.bounds.width - clipPositionViewWidth * 2 - playingIndicatorViewWidth
     }
     
+    private let clipPositionViewWidth: CGFloat = 20
+    private let targetPreviewVerticalMargin: CGFloat = 5
+    private let playingIndicatorViewWidth: CGFloat = 3
+    
     private weak var avPlayer: AVPlayer?
-    private var durationObserver: NSKeyValueObservation?
     private var timeObserver: Any?
+    private var durationObserver: NSKeyValueObservation?
     private var assetExportSession: AVAssetExportSession?
     
     override init(frame: CGRect) {
@@ -95,13 +95,11 @@ class ClipControlView: UIView {
             avPlayer?.removeTimeObserver(observer)
             timeObserver = nil
         }
-        durationObserver?.invalidate()
-        durationObserver = nil
         reset()
         self.avPlayer = player
         self.minTargetDuration = minTargetDuration
-        observerPlayerItemDuration()
-        observerPlayerPeriodicTime()
+        observePlayerItemDuration()
+        observePlayerPeriodicTime()
     }
     
     func reset() {
@@ -155,13 +153,15 @@ class ClipControlView: UIView {
         return composition
     }
     
-    private func observerPlayerItemDuration() {
+    private func observePlayerItemDuration() {
+        durationObserver?.invalidate()
+        durationObserver = nil
         if let player = avPlayer, let item = player.currentItem {
             durationObserver = item.observe(\.duration, changeHandler: { [weak self] item, change in
                 guard let strongSelf = self else { return }
                 if item.duration != .invalid {
                     strongSelf.loadAssetCompletion?()
-                    strongSelf.minPreviewWidth = strongSelf.validMaxDurationWidth * (strongSelf.minTargetDuration.seconds / item.duration.seconds)
+                    strongSelf.minTargetPreviewWidth = strongSelf.maxTargetPreviewWidth * (strongSelf.minTargetDuration.seconds / item.duration.seconds)
                     let imageGenerator = AVAssetImageGenerator(asset: item.asset)
                     imageGenerator.appliesPreferredTrackTransform = true
                     let frameSecond = item.duration.seconds / Double(strongSelf.previewFrames.count)
@@ -189,7 +189,7 @@ class ClipControlView: UIView {
         }
     }
     
-    private func observerPlayerPeriodicTime() {
+    private func observePlayerPeriodicTime() {
         timeObserver = avPlayer?.addPeriodicTimeObserver(forInterval: CMTime(value: 12, timescale: Self.timescale), queue: .main) { [weak self] time in
             guard let strongSelf = self, strongSelf.isPlaying, let currentItem = strongSelf.avPlayer?.currentItem else { return }
             let totalSeconds = currentItem.duration.seconds
@@ -200,7 +200,7 @@ class ClipControlView: UIView {
             var progress = min(max(strongSelf.headClipedDuration.seconds, currentSeconds), totalSeconds - strongSelf.tailClipedDuration.seconds) / totalSeconds
             progress = min(1, max(0, progress))
             let origin = strongSelf.playingIndicatorView.frame.origin
-            let originX = strongSelf.validMaxDurationWidth * progress + strongSelf.clipPositionWidth
+            let originX = strongSelf.maxTargetPreviewWidth * progress + strongSelf.clipPositionViewWidth
             strongSelf.playingIndicatorView.frame.origin = CGPoint(x: originX, y: origin.y)
         }
     }
@@ -215,7 +215,7 @@ class ClipControlView: UIView {
         if isPlaying {
             player.pause()
         } else {
-            if abs(playingIndicatorView.frame.maxX - (lightPreviewView.frame.maxX - clipPositionWidth)) < 0.1 {
+            if abs(playingIndicatorView.frame.maxX - (targetPreviewView.frame.maxX - clipPositionViewWidth)) < 0.1 {
                 item.seek(to: headClipedDuration, toleranceBefore: .zero, toleranceAfter: .zero, completionHandler: { [weak self] _ in
                     self?.avPlayer?.play()
                 })
@@ -229,7 +229,7 @@ class ClipControlView: UIView {
     @objc private func panOnHeadClipPositionView(_ pan: UIPanGestureRecognizer) {
         pauseVideo()
         let location = pan.location(in: backgroundView)
-        headOffset = min(max(0, location.x), validMaxDurationWidth - tailOffset - minPreviewWidth)
+        headOffset = min(max(0, location.x), maxTargetPreviewWidth - tailOffset - minTargetPreviewWidth)
         updateSubviewsLayout()
         let alpha: CGFloat
         switch pan.state {
@@ -247,7 +247,7 @@ class ClipControlView: UIView {
         pauseVideo()
         let backgroundViewWidth = backgroundView.bounds.width
         let location = pan.location(in: backgroundView)
-        tailOffset = min(max(0, backgroundViewWidth - location.x), validMaxDurationWidth - headOffset - minPreviewWidth)
+        tailOffset = min(max(0, backgroundViewWidth - location.x), maxTargetPreviewWidth - headOffset - minTargetPreviewWidth)
         updateSubviewsLayout()
         let alpha: CGFloat
         switch pan.state {
@@ -261,16 +261,16 @@ class ClipControlView: UIView {
         playingIndicatorView.alpha = alpha
     }
     
-    @objc private func panOnLightPreviewView(_ pan: UIPanGestureRecognizer) {
+    @objc private func panOnTargetPreviewView(_ pan: UIPanGestureRecognizer) {
         pauseVideo()
         let location = pan.location(in: backgroundView)
-        let originX = min(max(lightPreviewView.frame.minX + clipPositionWidth, location.x), lightPreviewView.frame.maxX - clipPositionWidth - playingIndicatorViewWidth)
-        let size = CGSize(width: playingIndicatorViewWidth, height: lightPreviewView.bounds.height - previewVerticalMargin * 2)
-        playingIndicatorView.frame = CGRect( origin: CGPoint(x: originX, y: previewVerticalMargin), size: size)
+        let originX = min(max(targetPreviewView.frame.minX + clipPositionViewWidth, location.x), targetPreviewView.frame.maxX - clipPositionViewWidth - playingIndicatorViewWidth)
+        let size = CGSize(width: playingIndicatorViewWidth, height: targetPreviewView.bounds.height - targetPreviewVerticalMargin * 2)
+        playingIndicatorView.frame = CGRect( origin: CGPoint(x: originX, y: targetPreviewVerticalMargin), size: size)
         switch pan.state {
         case .ended, .cancelled, .failed:
             if let playerItem = avPlayer?.currentItem {
-                let seconds = (originX - clipPositionWidth) / validMaxDurationWidth * playerItem.duration.seconds
+                let seconds = (originX - clipPositionViewWidth) / maxTargetPreviewWidth * playerItem.duration.seconds
                 let time = CMTime(seconds: seconds, preferredTimescale: Self.timescale)
                 playerItem.seek(to: time, toleranceBefore: .zero, toleranceAfter: .zero, completionHandler: nil)
             }
@@ -284,35 +284,35 @@ class ClipControlView: UIView {
         let backgroundViewWidth = backgroundView.bounds.width
         headMaskView.frame = CGRect(x: 0, y: 0, width: headOffset, height: backgroundViewHeight)
         tailMaskView.frame = CGRect(x: backgroundViewWidth - tailOffset, y: 0, width: tailOffset, height: backgroundViewHeight)
-        lightPreviewView.frame = CGRect(x: headOffset, y: 0, width: backgroundViewWidth - headOffset - tailOffset, height: backgroundViewHeight)
-        let lightPreviewViewWidth = lightPreviewView.bounds.width
-        let lightPreviewViewHeight = lightPreviewView.bounds.height
-        let path = UIBezierPath(rect: lightPreviewView.bounds)
-        path.append(UIBezierPath(rect: CGRect(x: clipPositionWidth, y: previewVerticalMargin, width: lightPreviewViewWidth - clipPositionWidth * 2, height: lightPreviewViewHeight - previewVerticalMargin * 2)))
-        lightPreviewMaskLayer.path = path.cgPath
+        targetPreviewView.frame = CGRect(x: headOffset, y: 0, width: backgroundViewWidth - headOffset - tailOffset, height: backgroundViewHeight)
+        let targetPreviewViewWidth = targetPreviewView.bounds.width
+        let targetPreviewViewHeight = targetPreviewView.bounds.height
+        let path = UIBezierPath(rect: targetPreviewView.bounds)
+        path.append(UIBezierPath(rect: CGRect(x: clipPositionViewWidth, y: targetPreviewVerticalMargin, width: targetPreviewViewWidth - clipPositionViewWidth * 2, height: targetPreviewViewHeight - targetPreviewVerticalMargin * 2)))
+        targetPreviewMaskLayer.path = path.cgPath
         
-        headClipPositionView.frame = CGRect(x: 0, y: 0, width: clipPositionWidth, height: lightPreviewViewHeight)
-        tailClipPositionView.frame = CGRect(x: lightPreviewViewWidth - clipPositionWidth, y: 0, width: clipPositionWidth, height: lightPreviewViewHeight)
+        headClipPositionView.frame = CGRect(x: 0, y: 0, width: clipPositionViewWidth, height: targetPreviewViewHeight)
+        tailClipPositionView.frame = CGRect(x: targetPreviewViewWidth - clipPositionViewWidth, y: 0, width: clipPositionViewWidth, height: targetPreviewViewHeight)
         if headOffset > 0 || tailOffset > 0 {
-            lightPreviewView.backgroundColor = UIColor.systemYellow
+            targetPreviewView.backgroundColor = UIColor.systemYellow
             headClipPositionView.imageView.tintColor = UIColor.black
             tailClipPositionView.imageView.tintColor = UIColor.black
         } else {
-            lightPreviewView.backgroundColor = UIColor.secondarySystemBackground
+            targetPreviewView.backgroundColor = UIColor.secondarySystemBackground
             headClipPositionView.imageView.tintColor = UIColor.white
             tailClipPositionView.imageView.tintColor = UIColor.white
         }
     }
     
     private func updatePlayingIndicatorViewPosition(_ position: ClipPosition) {
-        let lightPreviewViewHeight = lightPreviewView.bounds.height
-        let size = CGSize(width: playingIndicatorViewWidth, height: lightPreviewViewHeight - previewVerticalMargin * 2)
+        let targetPreviewViewHeight = targetPreviewView.bounds.height
+        let size = CGSize(width: playingIndicatorViewWidth, height: targetPreviewViewHeight - targetPreviewVerticalMargin * 2)
         let origin: CGPoint
         switch position {
         case .head:
-            origin = CGPoint(x: lightPreviewView.frame.minX + clipPositionWidth, y: previewVerticalMargin)
+            origin = CGPoint(x: targetPreviewView.frame.minX + clipPositionViewWidth, y: targetPreviewVerticalMargin)
         case .tail:
-            origin = CGPoint(x: lightPreviewView.frame.maxX - clipPositionWidth - playingIndicatorViewWidth, y: previewVerticalMargin)
+            origin = CGPoint(x: targetPreviewView.frame.maxX - clipPositionViewWidth - playingIndicatorViewWidth, y: targetPreviewVerticalMargin)
         }
         playingIndicatorView.frame = CGRect(origin: origin, size: size)
     }
@@ -324,11 +324,11 @@ class ClipControlView: UIView {
         }
         switch position {
         case .head:
-            let seconds = headOffset / validMaxDurationWidth * playerItem.duration.seconds
+            let seconds = headOffset / maxTargetPreviewWidth * playerItem.duration.seconds
             headClipedDuration = CMTime(seconds: seconds, preferredTimescale: Self.timescale)
             playerItem.seek(to: headClipedDuration, toleranceBefore: .zero, toleranceAfter: .zero, completionHandler: nil)
         case .tail:
-            let seconds = tailOffset / validMaxDurationWidth * playerItem.duration.seconds
+            let seconds = tailOffset / maxTargetPreviewWidth * playerItem.duration.seconds
             tailClipedDuration = CMTime(seconds: seconds, preferredTimescale: Self.timescale)
             let time = CMTime(seconds: playerItem.duration.seconds - seconds, preferredTimescale: Self.timescale)
             playerItem.seek(to: time, toleranceBefore: .zero, toleranceAfter: .zero, completionHandler: nil)
@@ -379,10 +379,10 @@ class ClipControlView: UIView {
         previewFrameStackView.translatesAutoresizingMaskIntoConstraints = false
         backgroundView.addSubview(previewFrameStackView)
         NSLayoutConstraint.activate([
-            previewFrameStackView.leadingAnchor.constraint(equalTo: backgroundView.leadingAnchor, constant: clipPositionWidth),
-            previewFrameStackView.topAnchor.constraint(equalTo: backgroundView.topAnchor, constant: previewVerticalMargin),
-            previewFrameStackView.bottomAnchor.constraint(equalTo: backgroundView.bottomAnchor, constant: -previewVerticalMargin),
-            previewFrameStackView.trailingAnchor.constraint(equalTo: backgroundView.trailingAnchor, constant: -clipPositionWidth)
+            previewFrameStackView.leadingAnchor.constraint(equalTo: backgroundView.leadingAnchor, constant: clipPositionViewWidth),
+            previewFrameStackView.topAnchor.constraint(equalTo: backgroundView.topAnchor, constant: targetPreviewVerticalMargin),
+            previewFrameStackView.bottomAnchor.constraint(equalTo: backgroundView.bottomAnchor, constant: -targetPreviewVerticalMargin),
+            previewFrameStackView.trailingAnchor.constraint(equalTo: backgroundView.trailingAnchor, constant: -clipPositionViewWidth)
         ])
         
         // 头部被裁剪区域
@@ -394,26 +394,26 @@ class ClipControlView: UIView {
         backgroundView.addSubview(tailMaskView)
         
         // 中间预览区域
-        lightPreviewView.backgroundColor = UIColor.systemYellow
-        lightPreviewView.layer.cornerRadius = 5
-        lightPreviewView.clipsToBounds = true
-        lightPreviewView.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(panOnLightPreviewView(_:))))
-        lightPreviewMaskLayer.backgroundColor = UIColor.clear.cgColor
-        lightPreviewMaskLayer.fillRule = .evenOdd
-        lightPreviewView.layer.mask = lightPreviewMaskLayer
-        backgroundView.addSubview(lightPreviewView)
+        targetPreviewView.backgroundColor = UIColor.systemYellow
+        targetPreviewView.layer.cornerRadius = 5
+        targetPreviewView.clipsToBounds = true
+        targetPreviewView.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(panOnTargetPreviewView(_:))))
+        targetPreviewMaskLayer.backgroundColor = UIColor.clear.cgColor
+        targetPreviewMaskLayer.fillRule = .evenOdd
+        targetPreviewView.layer.mask = targetPreviewMaskLayer
+        backgroundView.addSubview(targetPreviewView)
         
         // 头部裁剪位置
         headClipPositionView.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(panOnHeadClipPositionView(_:))))
         headClipPositionView.imageView.tintColor = UIColor.white
         headClipPositionView.imageView.image = UIImage(systemName: "chevron.compact.left")
-        lightPreviewView.addSubview(headClipPositionView)
+        targetPreviewView.addSubview(headClipPositionView)
         
         // 尾部裁剪位置
         tailClipPositionView.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(panOnTailClipPositionView(_:))))
         tailClipPositionView.imageView.tintColor = UIColor.white
         tailClipPositionView.imageView.image = UIImage(systemName: "chevron.compact.right")
-        lightPreviewView.addSubview(tailClipPositionView)
+        targetPreviewView.addSubview(tailClipPositionView)
         
         // 播放进度指示器
         playingIndicatorView.backgroundColor = UIColor.white
