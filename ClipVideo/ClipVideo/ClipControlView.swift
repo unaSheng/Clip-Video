@@ -66,7 +66,7 @@ class ClipControlView: UIView {
     }
     
     private let clipPositionViewWidth: CGFloat = 20
-    private let targetPreviewVerticalMargin: CGFloat = 5
+    private let previewFramesVerticalMargin: CGFloat = 5
     private let playingIndicatorViewWidth: CGFloat = 3
     
     private weak var avPlayer: AVPlayer?
@@ -265,8 +265,8 @@ class ClipControlView: UIView {
         pauseVideo()
         let location = pan.location(in: backgroundView)
         let originX = min(max(targetPreviewView.frame.minX + clipPositionViewWidth, location.x), targetPreviewView.frame.maxX - clipPositionViewWidth - playingIndicatorViewWidth)
-        let size = CGSize(width: playingIndicatorViewWidth, height: targetPreviewView.bounds.height - targetPreviewVerticalMargin * 2)
-        playingIndicatorView.frame = CGRect( origin: CGPoint(x: originX, y: targetPreviewVerticalMargin), size: size)
+        let size = CGSize(width: playingIndicatorViewWidth, height: targetPreviewView.bounds.height - previewFramesVerticalMargin * 2)
+        playingIndicatorView.frame = CGRect( origin: CGPoint(x: originX, y: previewFramesVerticalMargin), size: size)
         switch pan.state {
         case .ended, .cancelled, .failed:
             if let playerItem = avPlayer?.currentItem {
@@ -288,7 +288,7 @@ class ClipControlView: UIView {
         let targetPreviewViewWidth = targetPreviewView.bounds.width
         let targetPreviewViewHeight = targetPreviewView.bounds.height
         let path = UIBezierPath(rect: targetPreviewView.bounds)
-        path.append(UIBezierPath(rect: CGRect(x: clipPositionViewWidth, y: targetPreviewVerticalMargin, width: targetPreviewViewWidth - clipPositionViewWidth * 2, height: targetPreviewViewHeight - targetPreviewVerticalMargin * 2)))
+        path.append(UIBezierPath(rect: CGRect(x: clipPositionViewWidth, y: previewFramesVerticalMargin, width: targetPreviewViewWidth - clipPositionViewWidth * 2, height: targetPreviewViewHeight - previewFramesVerticalMargin * 2)))
         targetPreviewMaskLayer.path = path.cgPath
         
         headClipPositionView.frame = CGRect(x: 0, y: 0, width: clipPositionViewWidth, height: targetPreviewViewHeight)
@@ -306,13 +306,13 @@ class ClipControlView: UIView {
     
     private func updatePlayingIndicatorViewPosition(_ position: ClipPosition) {
         let targetPreviewViewHeight = targetPreviewView.bounds.height
-        let size = CGSize(width: playingIndicatorViewWidth, height: targetPreviewViewHeight - targetPreviewVerticalMargin * 2)
+        let size = CGSize(width: playingIndicatorViewWidth, height: targetPreviewViewHeight - previewFramesVerticalMargin * 2)
         let origin: CGPoint
         switch position {
         case .head:
-            origin = CGPoint(x: targetPreviewView.frame.minX + clipPositionViewWidth, y: targetPreviewVerticalMargin)
+            origin = CGPoint(x: targetPreviewView.frame.minX + clipPositionViewWidth, y: previewFramesVerticalMargin)
         case .tail:
-            origin = CGPoint(x: targetPreviewView.frame.maxX - clipPositionViewWidth - playingIndicatorViewWidth, y: targetPreviewVerticalMargin)
+            origin = CGPoint(x: targetPreviewView.frame.maxX - clipPositionViewWidth - playingIndicatorViewWidth, y: previewFramesVerticalMargin)
         }
         playingIndicatorView.frame = CGRect(origin: origin, size: size)
     }
@@ -380,8 +380,8 @@ class ClipControlView: UIView {
         backgroundView.addSubview(previewFrameStackView)
         NSLayoutConstraint.activate([
             previewFrameStackView.leadingAnchor.constraint(equalTo: backgroundView.leadingAnchor, constant: clipPositionViewWidth),
-            previewFrameStackView.topAnchor.constraint(equalTo: backgroundView.topAnchor, constant: targetPreviewVerticalMargin),
-            previewFrameStackView.bottomAnchor.constraint(equalTo: backgroundView.bottomAnchor, constant: -targetPreviewVerticalMargin),
+            previewFrameStackView.topAnchor.constraint(equalTo: backgroundView.topAnchor, constant: previewFramesVerticalMargin),
+            previewFrameStackView.bottomAnchor.constraint(equalTo: backgroundView.bottomAnchor, constant: -previewFramesVerticalMargin),
             previewFrameStackView.trailingAnchor.constraint(equalTo: backgroundView.trailingAnchor, constant: -clipPositionViewWidth)
         ])
         
