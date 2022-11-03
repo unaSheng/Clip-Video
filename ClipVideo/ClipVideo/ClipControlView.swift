@@ -64,6 +64,7 @@ class ClipControlView: UIView {
     private var maxTargetPreviewWidth: CGFloat {
         return backgroundView.bounds.width - clipPositionViewWidth * 2 - playingIndicatorViewWidth
     }
+    private var playingIndicatorViewFrameWhenEndPanOnTargetPreview: CGRect?
     
     private let clipPositionViewWidth: CGFloat = 20
     private let previewFramesVerticalMargin: CGFloat = 5
@@ -201,7 +202,11 @@ class ClipControlView: UIView {
             progress = min(1, max(0, progress))
             let origin = strongSelf.playingIndicatorView.frame.origin
             let originX = strongSelf.maxTargetPreviewWidth * progress + strongSelf.clipPositionViewWidth
+            if let lastFrame = strongSelf.playingIndicatorViewFrameWhenEndPanOnTargetPreview, originX < lastFrame.minX {
+                return
+            }
             strongSelf.playingIndicatorView.frame.origin = CGPoint(x: originX, y: origin.y)
+            strongSelf.playingIndicatorViewFrameWhenEndPanOnTargetPreview = nil
         }
     }
     
@@ -215,7 +220,7 @@ class ClipControlView: UIView {
         if isPlaying {
             player.pause()
         } else {
-            if abs(playingIndicatorView.frame.maxX - (targetPreviewView.frame.maxX - clipPositionViewWidth)) < 0.1 {
+            if abs(playingIndicatorView.frame.maxX - (targetPreviewView.frame.maxX - clipPositionViewWidth)) < 1 {
                 item.seek(to: headClipedDuration, toleranceBefore: .zero, toleranceAfter: .zero, completionHandler: { [weak self] _ in
                     self?.avPlayer?.play()
                 })
@@ -264,7 +269,8 @@ class ClipControlView: UIView {
     @objc private func panOnTargetPreviewView(_ pan: UIPanGestureRecognizer) {
         pauseVideo()
         let location = pan.location(in: backgroundView)
-        let originX = min(max(targetPreviewView.frame.minX + clipPositionViewWidth, location.x), targetPreviewView.frame.maxX - clipPositionViewWidth - playingIndicatorViewWidth)
+        let maxOriginX = targetPreviewView.frame.maxX - clipPositionViewWidth - playingIndicatorViewWidth
+        let originX = min(max(targetPreviewView.frame.minX + clipPositionViewWidth, location.x), maxOriginX)
         let size = CGSize(width: playingIndicatorViewWidth, height: targetPreviewView.bounds.height - previewFramesVerticalMargin * 2)
         playingIndicatorView.frame = CGRect( origin: CGPoint(x: originX, y: previewFramesVerticalMargin), size: size)
         switch pan.state {
@@ -273,6 +279,9 @@ class ClipControlView: UIView {
                 let seconds = (originX - clipPositionViewWidth) / maxTargetPreviewWidth * playerItem.duration.seconds
                 let time = CMTime(seconds: seconds, preferredTimescale: Self.timescale)
                 playerItem.seek(to: time, toleranceBefore: .zero, toleranceAfter: .zero, completionHandler: nil)
+                if originX != maxOriginX {
+                    playingIndicatorViewFrameWhenEndPanOnTargetPreview = playingIndicatorView.frame
+                }
             }
         default:
             break
