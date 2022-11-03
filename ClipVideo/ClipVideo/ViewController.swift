@@ -17,15 +17,14 @@ class ViewController: UIViewController {
     @IBOutlet private weak var cancelButton: UIButton!
     @IBOutlet private weak var finishButton: UIButton!
     
-    private var isMuted = false
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         showClipSubviewsIfNeeded(false)
     }
     
     @IBAction private func muteButtonTapped(_ sender: Any) {
-        isMuted.toggle()
+        clipControlView.isMute.toggle()
+        let isMuted = clipControlView.isMute
         videoPlayerView.playerLayer.player?.volume = isMuted ? 0 : 1
         muteButton.isSelected = isMuted
     }
