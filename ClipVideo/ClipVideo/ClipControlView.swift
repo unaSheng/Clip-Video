@@ -246,6 +246,7 @@ class ClipControlView: UIView {
             updateClipedDuration(.head)
         }
         playingIndicatorView.alpha = alpha
+        playingIndicatorViewFrameWhenEndPanOnTargetPreview = nil
     }
     
     @objc private func panOnTailClipPositionView(_ pan: UIPanGestureRecognizer) {
@@ -264,6 +265,7 @@ class ClipControlView: UIView {
             updateClipedDuration(.tail)
         }
         playingIndicatorView.alpha = alpha
+        playingIndicatorViewFrameWhenEndPanOnTargetPreview = nil
     }
     
     @objc private func panOnTargetPreviewView(_ pan: UIPanGestureRecognizer) {
@@ -281,6 +283,8 @@ class ClipControlView: UIView {
                 playerItem.seek(to: time, toleranceBefore: .zero, toleranceAfter: .zero, completionHandler: nil)
                 if originX != maxOriginX {
                     playingIndicatorViewFrameWhenEndPanOnTargetPreview = playingIndicatorView.frame
+                } else {
+                    playingIndicatorViewFrameWhenEndPanOnTargetPreview = nil
                 }
             }
         default:
