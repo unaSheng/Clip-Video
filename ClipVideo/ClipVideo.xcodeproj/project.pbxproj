@@ -13,6 +13,7 @@
 		FA07BB532910D3E100596133 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FA07BB522910D3E100596133 /* Assets.xcassets */; };
 		FA07BB562910D3E100596133 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FA07BB542910D3E100596133 /* LaunchScreen.storyboard */; };
 		FA07BB5E2910F35300596133 /* ClipControlView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA07BB5D2910F35300596133 /* ClipControlView.swift */; };
+		FA67D0B62913ABE400E01032 /* MaskViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA67D0B52913ABE400E01032 /* MaskViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -24,6 +25,7 @@
 		FA07BB552910D3E100596133 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		FA07BB572910D3E100596133 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		FA07BB5D2910F35300596133 /* ClipControlView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipControlView.swift; sourceTree = "<group>"; };
+		FA67D0B52913ABE400E01032 /* MaskViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MaskViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -59,6 +61,7 @@
 				FA07BB492910D3E000596133 /* AppDelegate.swift */,
 				FA07BB4D2910D3E000596133 /* ViewController.swift */,
 				FA07BB5D2910F35300596133 /* ClipControlView.swift */,
+				FA67D0B52913ABE400E01032 /* MaskViewController.swift */,
 				FA07BB4F2910D3E000596133 /* Main.storyboard */,
 				FA07BB522910D3E100596133 /* Assets.xcassets */,
 				FA07BB542910D3E100596133 /* LaunchScreen.storyboard */,
@@ -139,6 +142,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				FA07BB4E2910D3E000596133 /* ViewController.swift in Sources */,
+				FA67D0B62913ABE400E01032 /* MaskViewController.swift in Sources */,
 				FA07BB5E2910F35300596133 /* ClipControlView.swift in Sources */,
 				FA07BB4A2910D3E000596133 /* AppDelegate.swift in Sources */,
 			);

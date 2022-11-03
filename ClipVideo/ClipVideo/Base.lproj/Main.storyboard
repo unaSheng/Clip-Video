@@ -114,12 +114,66 @@
             </objects>
             <point key="canvasLocation" x="130.76923076923077" y="-34.123222748815166"/>
         </scene>
+        <!--Mask View Controller-->
+        <scene sceneID="EvM-zP-GMQ">
+            <objects>
+                <viewController id="urY-0F-SZS" customClass="MaskViewController" customModule="ClipVideo" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="WZ9-cO-XVT">
+                        <rect key="frame" x="0.0" y="0.0" width="390" height="844"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" spacing="20" translatesAutoresizingMaskIntoConstraints="NO" id="aft-oy-wYW">
+                                <rect key="frame" x="50" y="97" width="290" height="663"/>
+                                <subviews>
+                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="VRo-U7-2w5">
+                                        <rect key="frame" x="0.0" y="0.0" width="290" height="321.66666666666669"/>
+                                    </imageView>
+                                    <view contentMode="scaleAspectFit" translatesAutoresizingMaskIntoConstraints="NO" id="90E-p2-jLx" customClass="MaskView" customModule="ClipVideo" customModuleProvider="target">
+                                        <rect key="frame" x="0.0" y="341.66666666666674" width="290" height="321.33333333333326"/>
+                                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                    </view>
+                                </subviews>
+                            </stackView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="fLN-V4-Nr5">
+                                <rect key="frame" x="344" y="62" width="31" height="30"/>
+                                <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                <state key="normal" title="换图">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                </state>
+                                <connections>
+                                    <action selector="updateImage:" destination="urY-0F-SZS" eventType="touchUpInside" id="mSI-L4-6wi"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="AZs-vi-FgI"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="aft-oy-wYW" firstAttribute="leading" secondItem="AZs-vi-FgI" secondAttribute="leading" constant="50" id="Hni-tC-pTr"/>
+                            <constraint firstItem="fLN-V4-Nr5" firstAttribute="top" secondItem="AZs-vi-FgI" secondAttribute="top" constant="15" id="YnC-mY-XSc"/>
+                            <constraint firstItem="AZs-vi-FgI" firstAttribute="trailing" secondItem="aft-oy-wYW" secondAttribute="trailing" constant="50" id="b9Y-83-5sJ"/>
+                            <constraint firstItem="aft-oy-wYW" firstAttribute="top" secondItem="AZs-vi-FgI" secondAttribute="top" constant="50" id="nnG-CB-snX"/>
+                            <constraint firstItem="AZs-vi-FgI" firstAttribute="bottom" secondItem="aft-oy-wYW" secondAttribute="bottom" constant="50" id="wc1-f3-28i"/>
+                            <constraint firstItem="AZs-vi-FgI" firstAttribute="trailing" secondItem="fLN-V4-Nr5" secondAttribute="trailing" constant="15" id="xXX-Du-62Z"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="maskView" destination="90E-p2-jLx" id="Fxe-CH-D4t"/>
+                        <outlet property="originImageView" destination="VRo-U7-2w5" id="cte-Gy-F8H"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="OqK-I7-Q33" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="970" y="-22"/>
+        </scene>
     </scenes>
     <resources>
         <image name="speaker.slash.fill" catalog="system" width="118" height="128"/>
         <image name="speaker.wave.2.fill" catalog="system" width="128" height="88"/>
         <systemColor name="secondaryLabelColor">
             <color red="0.23529411764705882" green="0.23529411764705882" blue="0.2627450980392157" alpha="0.59999999999999998" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
         <systemColor name="systemYellowColor">
             <color red="1" green="0.80000000000000004" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
