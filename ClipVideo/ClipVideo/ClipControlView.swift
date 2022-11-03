@@ -86,7 +86,7 @@ class ClipControlView: UIView {
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        updateSubviewsPosition()
+        updateSubviewsLayout()
         updatePlayingIndicatorViewPosition(.head)
     }
     
@@ -109,7 +109,7 @@ class ClipControlView: UIView {
         tailOffset = 0
         headClipedDuration = .zero
         tailClipedDuration = .zero
-        updateSubviewsPosition()
+        updateSubviewsLayout()
         updatePlayingIndicatorViewPosition(.head)
         updateClipedDuration(.head)
     }
@@ -191,10 +191,9 @@ class ClipControlView: UIView {
     
     private func observerPlayerPeriodicTime() {
         timeObserver = avPlayer?.addPeriodicTimeObserver(forInterval: CMTime(value: 12, timescale: Self.timescale), queue: .main) { [weak self] time in
-            guard let strongSelf = self, let currentItem = strongSelf.avPlayer?.currentItem else { return }
+            guard let strongSelf = self, strongSelf.isPlaying, let currentItem = strongSelf.avPlayer?.currentItem else { return }
             let totalSeconds = currentItem.duration.seconds
             let currentSeconds = currentItem.currentTime().seconds
-
             if totalSeconds - currentSeconds <= strongSelf.tailClipedDuration.seconds {
                 strongSelf.pauseVideo()
             }
@@ -217,8 +216,8 @@ class ClipControlView: UIView {
             player.pause()
         } else {
             if abs(playingIndicatorView.frame.maxX - (lightPreviewView.frame.maxX - clipPositionWidth)) < 0.1 {
-                item.seek(to: headClipedDuration, toleranceBefore: .zero, toleranceAfter: .zero, completionHandler: { _ in
-                    player.play()
+                item.seek(to: headClipedDuration, toleranceBefore: .zero, toleranceAfter: .zero, completionHandler: { [weak self] _ in
+                    self?.avPlayer?.play()
                 })
             } else {
                 player.play()
@@ -231,7 +230,7 @@ class ClipControlView: UIView {
         pauseVideo()
         let location = pan.location(in: backgroundView)
         headOffset = min(max(0, location.x), validMaxDurationWidth - tailOffset - minPreviewWidth)
-        updateSubviewsPosition()
+        updateSubviewsLayout()
         let alpha: CGFloat
         switch pan.state {
         case .changed:
@@ -249,7 +248,7 @@ class ClipControlView: UIView {
         let backgroundViewWidth = backgroundView.bounds.width
         let location = pan.location(in: backgroundView)
         tailOffset = min(max(0, backgroundViewWidth - location.x), validMaxDurationWidth - headOffset - minPreviewWidth)
-        updateSubviewsPosition()
+        updateSubviewsLayout()
         let alpha: CGFloat
         switch pan.state {
         case .changed:
@@ -266,9 +265,8 @@ class ClipControlView: UIView {
         pauseVideo()
         let location = pan.location(in: backgroundView)
         let originX = min(max(lightPreviewView.frame.minX + clipPositionWidth, location.x), lightPreviewView.frame.maxX - clipPositionWidth - playingIndicatorViewWidth)
-        playingIndicatorView.frame = CGRect(x: originX, y: previewVerticalMargin,
-                                            width: playingIndicatorViewWidth, height: lightPreviewView.bounds.height - previewVerticalMargin * 2)
-        playingIndicatorView.alpha = 1
+        let size = CGSize(width: playingIndicatorViewWidth, height: lightPreviewView.bounds.height - previewVerticalMargin * 2)
+        playingIndicatorView.frame = CGRect( origin: CGPoint(x: originX, y: previewVerticalMargin), size: size)
         switch pan.state {
         case .ended, .cancelled, .failed:
             if let playerItem = avPlayer?.currentItem {
@@ -281,26 +279,20 @@ class ClipControlView: UIView {
         }
     }
     
-    private func updateSubviewsPosition() {
+    private func updateSubviewsLayout() {
         let backgroundViewHeight = backgroundView.bounds.height
         let backgroundViewWidth = backgroundView.bounds.width
         headMaskView.frame = CGRect(x: 0, y: 0, width: headOffset, height: backgroundViewHeight)
         tailMaskView.frame = CGRect(x: backgroundViewWidth - tailOffset, y: 0, width: tailOffset, height: backgroundViewHeight)
-        lightPreviewView.frame = CGRect(x: headOffset, y: 0,
-                                        width: backgroundViewWidth - headOffset - tailOffset,
-                                        height: backgroundViewHeight)
+        lightPreviewView.frame = CGRect(x: headOffset, y: 0, width: backgroundViewWidth - headOffset - tailOffset, height: backgroundViewHeight)
         let lightPreviewViewWidth = lightPreviewView.bounds.width
         let lightPreviewViewHeight = lightPreviewView.bounds.height
         let path = UIBezierPath(rect: lightPreviewView.bounds)
-        path.append(UIBezierPath(rect: CGRect(x: clipPositionWidth, y: previewVerticalMargin,
-                                              width: lightPreviewViewWidth - clipPositionWidth * 2,
-                                              height: lightPreviewViewHeight - previewVerticalMargin * 2)))
+        path.append(UIBezierPath(rect: CGRect(x: clipPositionWidth, y: previewVerticalMargin, width: lightPreviewViewWidth - clipPositionWidth * 2, height: lightPreviewViewHeight - previewVerticalMargin * 2)))
         lightPreviewMaskLayer.path = path.cgPath
         
         headClipPositionView.frame = CGRect(x: 0, y: 0, width: clipPositionWidth, height: lightPreviewViewHeight)
-        tailClipPositionView.frame = CGRect(x: lightPreviewViewWidth - clipPositionWidth, y: 0,
-                                            width: clipPositionWidth,
-                                            height: lightPreviewViewHeight)
+        tailClipPositionView.frame = CGRect(x: lightPreviewViewWidth - clipPositionWidth, y: 0, width: clipPositionWidth, height: lightPreviewViewHeight)
         if headOffset > 0 || tailOffset > 0 {
             lightPreviewView.backgroundColor = UIColor.systemYellow
             headClipPositionView.imageView.tintColor = UIColor.black
