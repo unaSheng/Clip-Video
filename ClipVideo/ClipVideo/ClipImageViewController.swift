@@ -109,12 +109,16 @@ class ClipImageViewController: UIViewController {
             clip_ratio_3_4.alpha = 0.5
             clip_ratio_4_3.alpha = 1
         }
-        scrollView.contentInset = UIEdgeInsets(top: clipRectY, left: clipRectX, bottom: clipRectY, right: clipRectX)
-        let path = UIBezierPath.init(rect: view.bounds)
+        let contentInset = UIEdgeInsets(top: clipRectY, left: clipRectX, bottom: clipRectY, right: clipRectX)
+        scrollView.contentInset = contentInset
+        let path = UIBezierPath(rect: view.bounds)
         let rectPath = UIBezierPath(rect: CGRect(x: clipRectX, y: clipRectY, width: clipRectWidth, height: clipRectHeight))
         path.append(rectPath)
         maskLayer.path = path.cgPath
         visibleLayer.path = rectPath.cgPath
+        
+        settingScrollViewZoomScale()
+        settingScrollViewContentOffset()
     }
     
     private func clipImage() -> UIImage? {
@@ -189,24 +193,24 @@ class ClipImageViewController: UIViewController {
     }
     
     private func setupSubviews() {
-        scrollView = UIScrollView.init(frame: view.bounds)
+        self.view.backgroundColor = UIColor.black
+        scrollView = UIScrollView(frame: view.bounds)
         scrollView.delegate = self
         scrollView.backgroundColor = UIColor.clear
         scrollView.contentInsetAdjustmentBehavior = .never
+        scrollView.showsVerticalScrollIndicator = false
         view.addSubview(scrollView)
         
-        let imageViewH = image.size.height / image.size.width * screenWidth
-        let offsetY = (scrollView.bounds.height - imageViewH) / 2.0
-        imageView = UIImageView.init(frame: CGRect.init(x: 0, y: 0, width: screenWidth, height: imageViewH))
+        let imageViewH = image.size.height / image.size.width * clipRectWidth
+        imageView = UIImageView(frame: CGRect(x: 0, y: 0, width: clipRectWidth, height: imageViewH))
         imageView.image = image
         scrollView.addSubview(imageView)
-        scrollView.setContentOffset(CGPoint.init(x: 0, y: -offsetY), animated: false)
         
-        maskLayer = CAShapeLayer.init()
+        maskLayer = CAShapeLayer()
         maskLayer.fillRule = .evenOdd
-        maskLayer.fillColor = UIColor.black.withAlphaComponent(0.5).cgColor
+        maskLayer.fillColor = UIColor.black.withAlphaComponent(0.7).cgColor
         
-        visibleLayer = CAShapeLayer.init()
+        visibleLayer = CAShapeLayer()
         visibleLayer.lineWidth = 2
         visibleLayer.fillColor = UIColor.clear.cgColor
         visibleLayer.strokeColor = UIColor.white.cgColor
@@ -254,13 +258,22 @@ class ClipImageViewController: UIViewController {
     private func settingScrollViewZoomScale() {
         let imageWidth = image.size.width
         let imageHeight = image.size.height
-        if imageWidth > imageHeight {
-            scrollView.minimumZoomScale = clipRectWidth / (imageHeight / imageWidth * screenWidth)
-        } else {
-            scrollView.minimumZoomScale = clipRectWidth / screenWidth
-        }
+        let minHeight = imageHeight / imageWidth * clipRectWidth
+        let verticalScale = clipRectHeight / minHeight
+        let horizontalScale = clipRectWidth / clipRectWidth
+        let minimumZoomScale = max(verticalScale, horizontalScale)
+        scrollView.minimumZoomScale = minimumZoomScale
         scrollView.maximumZoomScale = (scrollView.minimumZoomScale) * timesThanMin
-        scrollView.zoomScale = scrollView.minimumZoomScale > 1 ? scrollView.minimumZoomScale : 1
+        scrollView.zoomScale = max(1, minimumZoomScale)
+    }
+    
+    private func settingScrollViewContentOffset() {
+        let contentInset = scrollView.contentInset
+        let imageViewWidth = clipRectWidth * scrollView.zoomScale
+        let imageViewHeight = image.size.height / image.size.width * imageViewWidth
+        let offsetX = (imageViewWidth - clipRectWidth) / 2.0 - contentInset.left
+        let offsetY = (imageViewHeight - clipRectHeight) / 2.0 - contentInset.top
+        scrollView.setContentOffset(CGPoint(x: offsetX, y: offsetY), animated: false)
     }
 }
 
