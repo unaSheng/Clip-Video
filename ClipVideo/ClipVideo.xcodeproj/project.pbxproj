@@ -15,6 +15,8 @@
 		FA07BB562910D3E100596133 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FA07BB542910D3E100596133 /* LaunchScreen.storyboard */; };
 		FA07BB5E2910F35300596133 /* ClipControlView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA07BB5D2910F35300596133 /* ClipControlView.swift */; };
 		FA67D0B62913ABE400E01032 /* MaskViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA67D0B52913ABE400E01032 /* MaskViewController.swift */; };
+		FAD2C64E2966A3C900183302 /* RecordingProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAD2C64D2966A3C900183302 /* RecordingProgressView.swift */; };
+		FAD2C6502966A4B800183302 /* TestViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAD2C64F2966A4B800183302 /* TestViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,6 +30,8 @@
 		FA07BB572910D3E100596133 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		FA07BB5D2910F35300596133 /* ClipControlView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipControlView.swift; sourceTree = "<group>"; };
 		FA67D0B52913ABE400E01032 /* MaskViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MaskViewController.swift; sourceTree = "<group>"; };
+		FAD2C64D2966A3C900183302 /* RecordingProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingProgressView.swift; sourceTree = "<group>"; };
+		FAD2C64F2966A4B800183302 /* TestViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -65,6 +69,8 @@
 				FA07BB5D2910F35300596133 /* ClipControlView.swift */,
 				FA67D0B52913ABE400E01032 /* MaskViewController.swift */,
 				0C1A80FD2945B7CC0062C811 /* ClipImageViewController.swift */,
+				FAD2C64F2966A4B800183302 /* TestViewController.swift */,
+				FAD2C64D2966A3C900183302 /* RecordingProgressView.swift */,
 				FA07BB4F2910D3E000596133 /* Main.storyboard */,
 				FA07BB522910D3E100596133 /* Assets.xcassets */,
 				FA07BB542910D3E100596133 /* LaunchScreen.storyboard */,
@@ -144,7 +150,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FAD2C6502966A4B800183302 /* TestViewController.swift in Sources */,
 				FA07BB4E2910D3E000596133 /* ViewController.swift in Sources */,
+				FAD2C64E2966A3C900183302 /* RecordingProgressView.swift in Sources */,
 				FA67D0B62913ABE400E01032 /* MaskViewController.swift in Sources */,
 				FA07BB5E2910F35300596133 /* ClipControlView.swift in Sources */,
 				FA07BB4A2910D3E000596133 /* AppDelegate.swift in Sources */,
